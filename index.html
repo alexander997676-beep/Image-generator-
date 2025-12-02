@@ -3,493 +3,467 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAZ AI | Premium Generator</title>
+    <title>FAZ AI | Infinity</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --faz-gold: #fbbf24;
-            --faz-gold-glow: rgba(251, 191, 36, 0.4);
-            --bg-dark: #09090b;
-            --panel-bg: #18181b;
-            --border: #27272a;
-            --text-main: #ffffff;
-            --text-muted: #a1a1aa;
+            --accent: #8b5cf6; /* Violet */
+            --accent-glow: #a78bfa;
+            --bg: #020617;
+            --surface: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #f8fafc;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            min-height: 100vh;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            background-image: 
-                linear-gradient(rgba(9, 9, 11, 0.9), rgba(9, 9, 11, 0.9)),
-                url('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2070&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }
-
-        /* --- Navbar --- */
-        nav {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 1.5rem 2rem;
-            border-bottom: 1px solid var(--border);
-            background: rgba(9, 9, 11, 0.8);
-            backdrop-filter: blur(10px);
+            justify-content: center;
+            position: relative;
         }
 
-        .logo {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 2rem;
-            font-weight: 700;
-            letter-spacing: 2px;
+        /* --- Ambient Background --- */
+        .ambient-light {
+            position: absolute;
+            width: 100%; height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            background: #020617;
+        }
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: float 20s infinite ease-in-out alternate;
+        }
+        .b1 { width: 50vw; height: 50vw; background: #4c1d95; top: -10%; left: -10%; }
+        .b2 { width: 40vw; height: 40vw; background: #0f766e; bottom: -10%; right: -10%; animation-delay: -5s; }
+        .b3 { width: 30vw; height: 30vw; background: #be185d; top: 40%; left: 40%; animation-duration: 30s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, -50px) scale(1.1); }
+        }
+
+        /* --- Header --- */
+        .header {
+            position: absolute;
+            top: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+        .brand {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+        .brand span { color: var(--accent); -webkit-text-fill-color: var(--accent); }
+        .badge {
+            background: rgba(255,255,255,0.1);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+        }
+
+        /* --- Main Stage (Image) --- */
+        .stage {
+            width: 100%;
+            max-width: 1000px; /* Large cinematic view */
+            height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .frame {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 80px rgba(0,0,0,0.5);
+            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .frame:hover { transform: scale(1.02); box-shadow: 0 30px 100px rgba(139, 92, 246, 0.15); }
+        
+        .frame img {
+            display: block;
+            max-width: 100%;
+            max-height: 60vh;
+            object-fit: contain;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+        
+        .frame.active img { opacity: 1; }
+
+        /* Actions Overlay (Download/Expand) */
+        .actions {
+            position: absolute;
+            bottom: 20px; right: 20px;
+            display: flex; gap: 10px;
+            opacity: 0; transition: 0.3s;
+        }
+        .frame:hover .actions { opacity: 1; }
+        
+        .action-btn {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
             color: white;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.2s;
+        }
+        .action-btn:hover { background: white; color: black; transform: scale(1.1); }
+
+        /* --- Loading State --- */
+        .infinity-loader {
+            position: absolute;
+            width: 60px; height: 60px;
+            display: none;
+        }
+        .infinity-loader svg { width: 100%; height: 100%; animation: rotate 2s linear infinite; }
+        .infinity-loader circle {
+            fill: none; stroke: var(--accent); stroke-width: 4; stroke-dasharray: 100; stroke-dashoffset: 100;
+            animation: dash 1.5s ease-in-out infinite;
+        }
+        @keyframes rotate { 100% { transform: rotate(360deg); } }
+        @keyframes dash { 0% { stroke-dasharray: 1, 150; stroke-dashoffset: 0; } 50% { stroke-dasharray: 90, 150; stroke-dashoffset: -35; } 100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; } }
+
+        /* --- Dock (Controls) --- */
+        .dock-wrapper {
+            position: fixed;
+            bottom: 40px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 20;
+            padding: 0 20px;
+        }
+
+        .dock {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 24px;
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-
-        .logo span { color: var(--faz-gold); text-shadow: 0 0 15px var(--faz-gold-glow); }
-
-        .status-dot {
-            height: 8px; width: 8px; background: #22c55e; border-radius: 50%;
-            box-shadow: 0 0 10px #22c55e; animation: pulse 2s infinite;
-        }
-
-        /* --- Main Layout --- */
-        .main-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
             width: 100%;
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 2rem;
+            max-width: 700px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            transition: transform 0.3s;
+        }
+
+        .dock:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3); }
+
+        .input-area {
             flex: 1;
-        }
-
-        /* --- Left Column: Generator --- */
-        .generator-panel {
-            background: rgba(24, 24, 27, 0.6);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            backdrop-filter: blur(16px);
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        .intro-text h2 {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .input-group {
-            position: relative;
-            background: #000;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 5px;
-            transition: all 0.3s;
-        }
-
-        .input-group:focus-within {
-            border-color: var(--faz-gold);
-            box-shadow: 0 0 20px var(--faz-gold-glow);
-        }
-
-        textarea {
-            width: 100%;
             background: transparent;
             border: none;
             color: white;
-            padding: 15px;
             font-size: 1rem;
-            resize: none;
-            height: 80px;
-            outline: none;
-            font-family: 'Inter', sans-serif;
+            padding: 12px 15px;
+            font-family: inherit;
         }
+        .input-area::placeholder { color: rgba(255,255,255,0.4); }
 
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 10px 10px 10px;
-        }
-
-        .toggle-switch {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        .toggle-input { display: none; }
-        .slider {
-            width: 40px; height: 20px; background: #3f3f46; border-radius: 20px; position: relative; transition: 0.3s;
-        }
-        .slider:before {
-            content: ""; position: absolute; height: 16px; width: 16px; left: 2px; bottom: 2px;
-            background: white; border-radius: 50%; transition: 0.3s;
-        }
-        .toggle-input:checked + .slider { background: var(--faz-gold); }
-        .toggle-input:checked + .slider:before { transform: translateX(20px); }
-        .toggle-input:checked ~ span { color: white; text-shadow: 0 0 10px var(--faz-gold-glow); }
-
-        .btn-generate {
-            background: linear-gradient(135deg, #fbbf24, #d97706);
-            color: #000;
+        .dock-btn {
+            width: 45px; height: 45px;
+            border-radius: 16px;
             border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.1rem;
-            text-transform: uppercase;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-generate:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(251, 191, 36, 0.3);
-        }
-
-        .btn-generate:disabled {
-            opacity: 0.7; cursor: not-allowed; filter: grayscale(1);
-        }
-
-        /* --- Image Preview --- */
-        .preview-area {
-            width: 100%;
-            aspect-ratio: 16/9;
-            background: #09090b;
-            border-radius: 12px;
-            border: 2px dashed #27272a;
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.7);
+            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
             position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        #resultImage {
-            width: 100%; height: 100%; object-fit: contain; display: none;
-        }
-
-        .placeholder-content { text-align: center; color: #52525b; }
+        .dock-btn:hover { background: rgba(255,255,255,0.15); color: white; }
         
-        /* Loading Bar */
-        .loading-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.8);
+        .dock-btn.primary {
+            background: linear-gradient(135deg, var(--accent), #6366f1);
+            color: white;
+            width: auto;
+            padding: 0 25px;
+            font-weight: 700;
+        }
+        .dock-btn.primary:hover { filter: brightness(1.2); transform: translateY(-2px); }
+        .dock-btn.primary span { margin-left: 8px; }
+
+        .recording-pulse {
+            position: absolute; width: 100%; height: 100%;
+            border-radius: 16px; border: 2px solid #ef4444;
+            animation: pulse-red 1.5s infinite;
             display: none;
-            flex-direction: column;
-            align-items: center;
+        }
+        .dock-btn.recording { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+        .dock-btn.recording .recording-pulse { display: block; }
+
+        @keyframes pulse-red { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.4); opacity: 0; } }
+
+        /* History Ribbon */
+        .history-ribbon {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            display: flex;
             justify-content: center;
             z-index: 10;
         }
-
-        .progress-bar {
-            width: 60%; height: 4px; background: #27272a; border-radius: 2px; overflow: hidden; margin-top: 20px;
-        }
-        .progress-fill {
-            height: 100%; background: var(--faz-gold); width: 0%;
-            box-shadow: 0 0 15px var(--faz-gold);
-            animation: load 3s ease-in-out infinite;
+        .history-trigger {
+            background: rgba(255,255,255,0.1);
+            width: 100px; height: 4px; border-radius: 4px;
+            margin-bottom: 5px;
+            transition: 0.3s;
         }
 
-        .status-text {
-            font-family: 'Rajdhani', sans-serif; color: var(--faz-gold); margin-top: 10px; letter-spacing: 1px;
+        /* Toast */
+        .toast {
+            position: fixed; top: 30px; 
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+            padding: 10px 20px; border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.9rem; transform: translateY(-100px); transition: 0.5s;
+        }
+        .toast.show { transform: translateY(0); }
+
+        @media (max-width: 600px) {
+            .brand { font-size: 2rem; }
+            .dock-btn.primary span { display: none; }
+            .dock-btn.primary { padding: 0; width: 45px; }
+            .frame { max-width: 100%; }
         }
 
-        @keyframes load { 0% { width: 0%; } 50% { width: 70%; } 100% { width: 100%; } }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-
-        /* --- Right Column: History --- */
-        .history-panel {
-            background: var(--panel-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            height: fit-content;
-            max-height: 80vh;
-        }
-
-        .history-header {
-            font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1.2rem;
-            margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between;
-        }
-
-        .history-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-
-        .history-item {
-            aspect-ratio: 1;
-            background: #27272a;
-            border-radius: 8px;
-            overflow: hidden;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s;
-            position: relative;
-        }
-
-        .history-item img { width: 100%; height: 100%; object-fit: cover; }
-        .history-item:hover { border-color: var(--faz-gold); }
-
-        /* Utilities */
-        .tag {
-            background: rgba(251, 191, 36, 0.1); color: var(--faz-gold);
-            padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;
-        }
-
-        .download-btn {
-            position: absolute; bottom: 20px; right: 20px;
-            background: white; color: black; border: none; padding: 10px 20px;
-            border-radius: 30px; font-weight: bold; cursor: pointer;
-            display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
-        .download-btn:hover { background: #f4f4f5; }
-
-        @media (max-width: 900px) {
-            .main-container { grid-template-columns: 1fr; }
-            .history-grid { display: flex; overflow-x: auto; padding-bottom: 10px; }
-            .history-item { min-width: 100px; height: 100px; }
-        }
     </style>
 </head>
 <body>
 
-    <nav>
-        <div class="logo">
-            <i class="fa-solid fa-cube"></i>
-            FAZ <span>AI</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: var(--text-muted);">
-            <div class="status-dot"></div>
-            System Online
-        </div>
-    </nav>
+    <!-- Ambient Background -->
+    <div class="ambient-light">
+        <div class="blob b1"></div>
+        <div class="blob b2"></div>
+        <div class="blob b3"></div>
+    </div>
 
-    <div class="main-container">
+    <!-- Header -->
+    <div class="header">
+        <div class="brand">FAZ <span>AI</span></div>
+        <div class="badge">Infinity Edition</div>
+        <div class="toast" id="toast">Copied to clipboard</div>
+    </div>
+
+    <!-- Stage -->
+    <div class="stage">
         
-        <!-- Generator Side -->
-        <div class="generator-panel">
-            <div class="intro-text">
-                <h2>Create the Impossible</h2>
-                <p style="color: var(--text-muted);">Powered by FAZ AI Neural Engine.</p>
-            </div>
+        <div class="infinity-loader" id="loader">
+            <svg viewBox="25 25 50 50"><circle cx="50" cy="50" r="20"></circle></svg>
+        </div>
 
-            <div class="input-group">
-                <textarea id="promptInput" placeholder="Describe your vision..." spellcheck="false"></textarea>
-                <div class="controls">
-                    <label class="toggle-switch">
-                        <input type="checkbox" class="toggle-input" id="proMode" checked>
-                        <div class="slider"></div>
-                        <span>Pro Mode</span>
-                    </label>
-                    <button class="btn-generate" id="generateBtn" onclick="generateArt()">
-                        Initialize <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="preview-area" id="previewArea">
-                <!-- Loading State -->
-                <div class="loading-overlay" id="loader">
-                    <i class="fa-solid fa-microchip fa-2x" style="color: var(--faz-gold); margin-bottom: 15px;"></i>
-                    <div class="progress-bar"><div class="progress-fill"></div></div>
-                    <div class="status-text" id="statusText">Processing Prompt...</div>
-                </div>
-
-                <!-- Placeholder -->
-                <div class="placeholder-content" id="placeholder">
-                    <i class="fa-brands fa-codepen fa-4x" style="opacity: 0.2; margin-bottom: 1rem;"></i>
-                    <p>Enter a prompt to initialize generation</p>
-                </div>
-
-                <!-- Result -->
-                <img id="resultImage">
-                <button class="download-btn" id="dlBtn" onclick="downloadArt()">
-                    <i class="fa-solid fa-download"></i> Download HD
-                </button>
+        <div class="frame" id="frame">
+            <img id="resultImage" alt="">
+            <div class="actions">
+                <button class="action-btn" onclick="downloadImage()" title="Download"><i class="fa-solid fa-download"></i></button>
+                <button class="action-btn" onclick="openFull()" title="Fullscreen"><i class="fa-solid fa-expand"></i></button>
             </div>
         </div>
 
-        <!-- History Side -->
-        <div class="history-panel">
-            <div class="history-header">
-                Session Gallery <span class="tag">RECENTS</span>
-            </div>
-            <div class="history-grid" id="historyGrid">
-                <!-- Javascript fills this -->
-            </div>
+        <!-- Empty State Hint -->
+        <div id="hint" style="position:absolute; color:rgba(255,255,255,0.3); text-align:center;">
+            <i class="fa-solid fa-wand-magic-sparkles fa-3x" style="margin-bottom:15px"></i>
+            <p>Dream it. Speak it. See it.</p>
         </div>
+    </div>
 
+    <!-- Floating Dock -->
+    <div class="dock-wrapper">
+        <div class="dock">
+            <!-- Voice Input -->
+            <button class="dock-btn" id="micBtn" onclick="toggleVoice()" title="Voice Input">
+                <div class="recording-pulse"></div>
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+
+            <!-- Magic Expand -->
+            <button class="dock-btn" onclick="magicExpand()" title="Magic Expand Prompt">
+                <i class="fa-solid fa-hat-wizard"></i>
+            </button>
+
+            <!-- Input -->
+            <input type="text" class="input-area" id="prompt" placeholder="Describe your imagination..." autocomplete="off">
+
+            <!-- Generate -->
+            <button class="dock-btn primary" id="genBtn" onclick="generate()">
+                <i class="fa-solid fa-bolt"></i> <span>Create</span>
+            </button>
+        </div>
     </div>
 
     <script>
         const API_URL = "https://api.xyro.site/ai/magic-studio?prompt=";
-        const promptInput = document.getElementById('promptInput');
-        const generateBtn = document.getElementById('generateBtn');
-        const resultImage = document.getElementById('resultImage');
+        const promptInput = document.getElementById('prompt');
+        const frame = document.getElementById('frame');
+        const img = document.getElementById('resultImage');
         const loader = document.getElementById('loader');
-        const placeholder = document.getElementById('placeholder');
-        const statusText = document.getElementById('statusText');
-        const dlBtn = document.getElementById('dlBtn');
-        const historyGrid = document.getElementById('historyGrid');
-        const proModeToggle = document.getElementById('proMode');
+        const hint = document.getElementById('hint');
+        const genBtn = document.getElementById('genBtn');
+        const micBtn = document.getElementById('micBtn');
 
-        // Typing effect for placeholder
-        const placeholders = [
-            "A cyberpunk samurai in a rainy neon city...",
-            "Gold and black marble statue of a lion...",
-            "Futuristic sports car on Mars...",
-            "Portrait of a robot with human eyes..."
-        ];
-        let placeholderIndex = 0;
-        
-        setInterval(() => {
-            promptInput.setAttribute('placeholder', placeholders[placeholderIndex]);
-            placeholderIndex = (placeholderIndex + 1) % placeholders.length;
-        }, 4000);
+        // --- 1. Voice Recognition (Web Speech API) ---
+        let recognition;
+        let isRecording = false;
 
-        async function generateArt() {
-            let prompt = promptInput.value.trim();
-            if (!prompt) return;
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
 
-            // Pro Mode Enhancement logic
-            if (proModeToggle.checked) {
-                prompt += ", highly detailed, 8k resolution, cinematic lighting, photorealistic, unreal engine 5 render, sharp focus, masterpiece";
-            }
+            recognition.onstart = function() {
+                isRecording = true;
+                micBtn.classList.add('recording');
+                promptInput.placeholder = "Listening...";
+            };
 
-            // UI Reset
-            startLoading();
+            recognition.onend = function() {
+                isRecording = false;
+                micBtn.classList.remove('recording');
+                promptInput.placeholder = "Describe your imagination...";
+            };
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                promptInput.value = transcript;
+                // Optional: Auto-generate after speaking
+                // generate(); 
+            };
+        } else {
+            micBtn.style.display = 'none'; // Hide if not supported
+        }
+
+        function toggleVoice() {
+            if (!recognition) return alert("Voice not supported in this browser.");
+            if (isRecording) recognition.stop();
+            else recognition.start();
+        }
+
+        // --- 2. Magic Expand (Prompt Engineering) ---
+        const styles = ["Cinematic Lighting", "Cyberpunk", "Studio Ghibli", "Oil Painting", "Hyperrealistic 8k", "Unreal Engine 5", "Vaporwave"];
+        const adjectives = ["intricate", "detailed", "glowing", "mystical", "vibrant", "moody", "majestic"];
+
+        function magicExpand() {
+            let text = promptInput.value.trim();
+            if(!text) return showToast("Type a basic word first (e.g., 'Cat')");
+
+            const randomStyle = styles[Math.floor(Math.random() * styles.length)];
+            const randomAdj = adjectives[Math.floor(Math.random() * adjectives.length)];
+            
+            // Rewrite logic
+            promptInput.value = `${text}, ${randomAdj}, ${randomStyle}, sharp focus, masterpiece`;
+            
+            // Visual feedback
+            const btn = document.querySelector('.fa-hat-wizard');
+            btn.classList.add('fa-spin');
+            setTimeout(() => btn.classList.remove('fa-spin'), 1000);
+        }
+
+        // --- 3. Generation Logic ---
+        async function generate() {
+            const prompt = promptInput.value.trim();
+            if (!prompt) return showToast("Please enter a prompt");
+
+            // UI State: Loading
+            hint.style.display = 'none';
+            frame.classList.remove('active'); // Hide old image
+            loader.style.display = 'block';
+            genBtn.disabled = true;
+            genBtn.style.opacity = '0.7';
 
             try {
-                // Simulate status updates
-                let steps = ["Analyzing Context...", "Optimizing Tensors...", "Rendering Pixels...", "Finalizing Output..."];
-                let stepIdx = 0;
-                let statusInterval = setInterval(() => {
-                    if(stepIdx < steps.length) {
-                        statusText.innerText = steps[stepIdx];
-                        stepIdx++;
-                    }
-                }, 800);
+                const response = await fetch(API_URL + encodeURIComponent(prompt));
+                if (!response.ok) throw new Error("API Limit/Error");
 
-                const fullUrl = API_URL + encodeURIComponent(prompt);
-                const response = await fetch(fullUrl);
-                
-                clearInterval(statusInterval); // Stop status updates
+                // Blob handling ensures image works
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
 
-                if (!response.ok) throw new Error("Server Error");
+                img.onload = () => {
+                    loader.style.display = 'none';
+                    frame.classList.add('active'); // Fade in
+                    genBtn.disabled = false;
+                    genBtn.style.opacity = '1';
+                };
+                img.src = url;
 
-                const contentType = response.headers.get("content-type");
-                let imgUrl = "";
-
-                if (contentType && contentType.includes("application/json")) {
-                    const data = await response.json();
-                    imgUrl = data.image || data.url || data.link || data.data; 
-                } else {
-                    const blob = await response.blob();
-                    imgUrl = URL.createObjectURL(blob);
-                }
-
-                if (imgUrl) {
-                    resultImage.src = imgUrl;
-                    resultImage.onload = () => {
-                        stopLoading();
-                        addToHistory(imgUrl);
-                    };
-                } else {
-                    throw new Error("No image data");
-                }
-
-            } catch (error) {
-                console.error(error);
-                stopLoading(true); // true means error
-                alert("FAZ AI System Error: Could not generate image.");
+            } catch (err) {
+                console.error(err);
+                loader.style.display = 'none';
+                genBtn.disabled = false;
+                genBtn.style.opacity = '1';
+                showToast("Generation failed. Try again.");
+                hint.style.display = 'block';
             }
         }
 
-        function startLoading() {
-            generateBtn.disabled = true;
-            generateBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing';
-            loader.style.display = 'flex';
-            placeholder.style.display = 'none';
-            resultImage.style.display = 'none';
-            dlBtn.style.display = 'none';
+        // --- 4. Utilities ---
+        function downloadImage() {
+            if (!img.src) return;
+            const a = document.createElement('a');
+            a.href = img.src;
+            a.download = `FAZ-Infinity-${Date.now()}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast("Downloading...");
         }
 
-        function stopLoading(isError = false) {
-            generateBtn.disabled = false;
-            generateBtn.innerHTML = 'Initialize <i class="fa-solid fa-arrow-right"></i>';
-            loader.style.display = 'none';
-            
-            if (!isError) {
-                resultImage.style.display = 'block';
-                dlBtn.style.display = 'block';
-            } else {
-                placeholder.style.display = 'block';
-            }
+        function openFull() {
+            if (img.src) window.open(img.src, '_blank');
         }
 
-        function downloadArt() {
-            if(resultImage.src) {
-                const link = document.createElement('a');
-                link.href = resultImage.src;
-                link.download = `FAZ-AI-${Date.now()}.png`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        function addToHistory(url) {
-            const div = document.createElement('div');
-            div.className = 'history-item';
-            div.innerHTML = `<img src="${url}">`;
-            div.onclick = () => {
-                resultImage.src = url;
-                resultImage.style.display = 'block';
-                placeholder.style.display = 'none';
-                dlBtn.style.display = 'block';
-            };
-            historyGrid.prepend(div);
-        }
-
-        // Allow Enter key to submit
-        promptInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                generateArt();
-            }
+        // Enter key support
+        promptInput.addEventListener("keypress", (e) => {
+            if(e.key === "Enter") generate();
         });
 
     </script>
