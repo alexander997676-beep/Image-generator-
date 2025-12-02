@@ -3,457 +3,416 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexusAI | Magic Studio</title>
+    <title>AETHER | Ultimate AI Studio</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #8b5cf6;
-            --secondary: #06b6d4;
-            --bg-dark: #0f172a;
-            --glass-bg: rgba(30, 41, 59, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-main: #f8fafc;
+            --primary: #f472b6; /* Pink/Rose */
+            --secondary: #8b5cf6; /* Violet */
+            --accent: #06b6d4; /* Cyan */
+            --bg-dark: #050511;
+            --glass: rgba(20, 20, 40, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
             --text-muted: #94a3b8;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
 
         body {
             background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.15) 0%, transparent 20%);
             color: var(--text-main);
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden; /* App-like feel */
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem;
-            overflow-x: hidden;
         }
 
-        /* --- UI Layout --- */
-        .app-wrapper {
+        /* --- Animated Background --- */
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            z-index: -1;
+            animation: orb-float 10s infinite alternate;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--secondary); top: -100px; left: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--primary); bottom: -50px; right: -50px; animation-delay: -2s; }
+        .orb-3 { width: 200px; height: 200px; background: var(--accent); top: 40%; left: 60%; animation-duration: 15s; }
+
+        @keyframes orb-float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(30px, 50px); }
+        }
+
+        /* --- Layout --- */
+        .sidebar {
+            width: 300px;
+            background: rgba(10, 10, 20, 0.5);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            transition: transform 0.3s ease;
+        }
+
+        .main-content {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            overflow-y: auto;
+            align-items: center;
+        }
+
+        /* --- Sidebar Elements --- */
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(to right, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 5px;
+        }
+
+        .history-item {
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .history-item:hover {
+            background: rgba(255,255,255,0.08);
+            color: white;
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        /* --- Main Stage --- */
+        .container {
             width: 100%;
             max-width: 900px;
             display: flex;
             flex-direction: column;
-            gap: 2rem;
-            position: relative;
-            z-index: 1;
+            gap: 20px;
         }
 
-        /* --- Header --- */
-        header {
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-
-        h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
-        }
-
-        .badge {
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            padding: 4px 12px;
+        /* Input Area */
+        .input-box {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
             border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-left: 10px;
-            vertical-align: middle;
-            color: white;
-            -webkit-text-fill-color: white;
+            padding: 15px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-
-        /* --- Main Card --- */
-        .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 2rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        /* --- Controls --- */
-        .input-area {
-            position: relative;
-            margin-bottom: 2rem;
-        }
-
-        .input-wrapper {
-            display: flex;
-            gap: 12px;
-            background: rgba(15, 23, 42, 0.6);
-            padding: 8px;
-            border-radius: 16px;
-            border: 1px solid var(--glass-border);
-            transition: border-color 0.3s;
-        }
-
-        .input-wrapper:focus-within {
-            border-color: var(--primary);
+        
+        .input-box:focus-within {
+            border-color: var(--secondary);
             box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
         }
 
-        input {
+        .text-area-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        textarea {
             flex: 1;
             background: transparent;
             border: none;
             color: white;
             font-size: 1.1rem;
-            padding: 12px 16px;
+            resize: none;
+            height: 60px;
             outline: none;
+            padding: 10px;
         }
 
-        .btn {
-            padding: 12px 24px;
-            border-radius: 12px;
+        .action-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
             border: none;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
             color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px -5px rgba(139, 92, 246, 0.4);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text-muted);
-            padding: 8px 16px;
-            font-size: 0.9rem;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-        }
-
-        .prompt-tools {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 8px;
-        }
-
-        /* --- Image Display --- */
-        .image-stage {
-            width: 100%;
-            aspect-ratio: 16/9; /* Default aspect, adjusts to image */
-            min-height: 400px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 16px;
-            overflow: hidden;
-            position: relative;
+            font-size: 1.5rem;
+            transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px dashed rgba(255,255,255,0.1);
+        }
+
+        .action-btn:hover { transform: scale(1.05); }
+        .action-btn:active { transform: scale(0.95); }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+
+        /* Style Chips */
+        .style-chips {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        
+        .chip {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .chip:hover { background: rgba(255,255,255,0.15); }
+        .chip.active { background: var(--secondary); border-color: var(--secondary); color: white; }
+        
+        .enhance-btn {
+            margin-left: auto;
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+        .enhance-btn:hover { background: rgba(251, 191, 36, 0.2); }
+
+        /* Image Display */
+        .display-area {
+            position: relative;
+            width: 100%;
+            min-height: 500px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 20px;
+            border: 2px dashed var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
             transition: all 0.3s;
         }
 
-        .image-stage.has-image {
+        .display-area.loaded {
             border: none;
             background: transparent;
-            aspect-ratio: auto;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
         }
 
-        .generated-img {
+        #resultImage {
             max-width: 100%;
-            max-height: 600px;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            max-height: 70vh;
+            border-radius: 12px;
             display: none;
-            opacity: 0;
-            transition: opacity 0.5s ease;
+            cursor: zoom-in;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
 
-        .image-overlay {
+        /* Overlay Controls */
+        .img-controls {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 20px;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            bottom: 20px;
             display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
+            gap: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-radius: 30px;
             opacity: 0;
             transform: translateY(20px);
             transition: all 0.3s;
+            backdrop-filter: blur(4px);
         }
 
-        .image-stage:hover .image-overlay {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .display-area:hover .img-controls { opacity: 1; transform: translateY(0); }
 
-        /* --- Loading Animation --- */
-        .loader {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .scan-line {
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--primary), var(--secondary), transparent);
-            position: absolute;
-            top: 0;
-            animation: scan 2s linear infinite;
-            box-shadow: 0 0 15px var(--primary);
-        }
-
-        @keyframes scan {
-            0% { top: 0; opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-        }
-
-        .loader-text {
-            color: var(--secondary);
-            font-size: 0.9rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-        }
-
-        /* --- Gallery --- */
-        .gallery-section {
-            margin-top: 1rem;
-        }
-        
-        .gallery-title {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .gallery-scroll {
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-            padding-bottom: 10px;
-            scrollbar-width: thin;
-            scrollbar-color: var(--glass-border) transparent;
-        }
-
-        .gallery-item {
-            flex: 0 0 100px;
-            height: 100px;
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s;
-            position: relative;
-        }
-
-        .gallery-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .gallery-item:hover {
-            border-color: var(--primary);
-            transform: scale(1.05);
-        }
-
-        /* --- Toast Notification --- */
-        .toast-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 100;
-        }
-
-        .toast {
-            background: rgba(15, 23, 42, 0.95);
-            border-left: 4px solid var(--primary);
+        .control-btn {
+            background: transparent;
+            border: none;
             color: white;
-            padding: 16px 24px;
-            border-radius: 8px;
-            margin-top: 10px;
-            display: flex;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .control-btn:hover { background: rgba(255,255,255,0.2); }
+
+        /* Loading Animation */
+        .cyber-loader {
+            display: none;
+            width: 80px;
+            height: 80px;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--secondary);
+            border-right: 2px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 100;
+            display: none;
             align-items: center;
-            gap: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transform: translateX(120%);
-            transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            justify-content: center;
+            flex-direction: column;
         }
+        .lightbox img { max-width: 90%; max-height: 90%; box-shadow: 0 0 50px rgba(139, 92, 246, 0.3); }
+        .lightbox-close { position: absolute; top: 30px; right: 30px; color: white; font-size: 2rem; cursor: pointer; }
 
-        .toast.show {
-            transform: translateX(0);
-        }
-        
-        .toast.error { border-left-color: #ef4444; }
-        .toast.success { border-left-color: #22c55e; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        @media (max-width: 600px) {
-            h1 { font-size: 2rem; }
-            .btn span { display: none; }
-            .btn { padding: 12px; }
-            .input-wrapper { flex-direction: column; gap: 5px; }
-            .btn-primary { width: 100%; justify-content: center; }
-            .gallery-item { flex: 0 0 80px; height: 80px; }
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -300px; height: 100%; background: #050511; }
+            .sidebar.open { transform: translateX(300px); }
+            .menu-toggle { display: block; position: fixed; top: 20px; left: 20px; z-index: 20; color: white; font-size: 1.5rem; cursor: pointer; }
+            .main-content { padding: 1rem; padding-top: 60px; }
+            .display-area { min-height: 300px; }
         }
+        @media (min-width: 769px) { .menu-toggle { display: none; } }
+
     </style>
 </head>
 <body>
 
-    <div class="app-wrapper">
-        <header>
-            <h1>NexusAI <span class="badge">Pro</span></h1>
-            <p style="color: var(--text-muted)">Generate hyper-realistic images powered by Magic Studio</p>
-        </header>
+    <!-- Background Orbs -->
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
 
-        <div class="glass-panel">
+    <!-- Mobile Menu Toggle -->
+    <div class="menu-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></div>
+
+    <!-- Sidebar (History) -->
+    <div class="sidebar" id="sidebar">
+        <div class="brand">
+            <i class="fa-solid fa-atom fa-spin" style="--fa-animation-duration: 3s;"></i>
+            AETHER
+        </div>
+        <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;">Recent Prompts</div>
+        <div class="history-list" id="historyList">
+            <!-- JS populates this -->
+            <div style="text-align: center; margin-top: 20px; color: #475569;">No history yet</div>
+        </div>
+        <button onclick="clearHistory()" style="margin-top: 10px; background: transparent; border: 1px solid #334155; color: #94a3b8; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">Clear History</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <div class="container">
             <!-- Input Section -->
-            <div class="input-area">
-                <div class="input-wrapper">
-                    <input type="text" id="promptInput" placeholder="A futuristic city with neon lights, cyberpunk style, 8k..." autocomplete="off">
-                    <button class="btn btn-primary" id="generateBtn" onclick="generateImage()">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Generate</span>
+            <div class="input-box">
+                <div class="text-area-wrapper">
+                    <textarea id="promptInput" placeholder="Describe your imagination... (e.g., A floating island in the sky)" spellcheck="false"></textarea>
+                    <button class="action-btn" id="generateBtn" onclick="generateImage()" title="Generate (Ctrl+Enter)">
+                        <i class="fa-solid fa-bolt"></i>
                     </button>
                 </div>
-                <div class="prompt-tools">
-                    <button class="btn btn-secondary" onclick="randomPrompt()">
-                        <i class="fa-solid fa-dice"></i> Surprise Me
-                    </button>
-                </div>
-            </div>
-
-            <!-- Image Display -->
-            <div class="image-stage" id="imageStage">
                 
-                <!-- Loading Animation -->
-                <div class="loader" id="loader">
-                    <div class="scan-line"></div>
-                    <i class="fa-solid fa-circle-notch fa-spin fa-2x" style="color: var(--primary)"></i>
-                    <span class="loader-text">Constructing Reality...</span>
-                </div>
-
-                <!-- Placeholder -->
-                <div id="placeholder" style="text-align: center; color: var(--text-muted);">
-                    <i class="fa-regular fa-image fa-3x" style="margin-bottom: 1rem; opacity: 0.5;"></i>
-                    <p>Your imagination awaits</p>
-                </div>
-
-                <!-- Result Image -->
-                <img id="resultImage" class="generated-img" alt="Generated Art">
-
-                <!-- Hover Overlay -->
-                <div class="image-overlay" id="imageOverlay" style="display: none;">
-                    <div style="background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 6px; font-size: 0.8rem;">
-                        <i class="fa-solid fa-check-circle" style="color: #4ade80"></i> Completed
+                <div class="style-chips">
+                    <div class="chip" onclick="applyStyle(this, 'Cyberpunk')">Cyberpunk</div>
+                    <div class="chip" onclick="applyStyle(this, 'Studio Ghibli')">Anime</div>
+                    <div class="chip" onclick="applyStyle(this, 'Realistic 8k')">Realistic</div>
+                    <div class="chip" onclick="applyStyle(this, 'Oil Painting')">Oil Painting</div>
+                    <div class="chip" onclick="applyStyle(this, '3D Render')">3D</div>
+                    <div class="chip enhance-btn" onclick="enhancePrompt()">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Magic Enhance
                     </div>
-                    <button class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;" onclick="downloadImage()">
-                        <i class="fa-solid fa-download"></i> Download
-                    </button>
                 </div>
             </div>
 
-            <!-- Session Gallery -->
-            <div class="gallery-section">
-                <div class="gallery-title">Session History</div>
-                <div class="gallery-scroll" id="gallery">
-                    <!-- Thumbnails appended here -->
+            <!-- Image Stage -->
+            <div class="display-area" id="displayArea">
+                <div id="placeholder" style="text-align: center; color: var(--text-muted);">
+                    <i class="fa-regular fa-image fa-3x" style="opacity: 0.3; margin-bottom: 15px;"></i>
+                    <p>Art requires a spark.</p>
+                </div>
+                
+                <div class="cyber-loader" id="loader"></div>
+                
+                <img id="resultImage" alt="AI Generated" onclick="openLightbox()">
+
+                <div class="img-controls" id="imgControls">
+                    <button class="control-btn" onclick="downloadImage()" title="Download"><i class="fa-solid fa-download"></i></button>
+                    <button class="control-btn" onclick="openLightbox()" title="Fullscreen"><i class="fa-solid fa-expand"></i></button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Toast Notifications -->
-    <div class="toast-container" id="toastContainer"></div>
+    <!-- Lightbox Modal -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <div class="lightbox-close">&times;</div>
+        <img id="lightboxImg">
+        <div style="color:white; margin-top: 20px; opacity: 0.7;">Click anywhere to close</div>
+    </div>
 
     <script>
-        // Configuration
         const API_URL = "https://api.xyro.site/ai/magic-studio?prompt=";
-        
-        // Elements
         const promptInput = document.getElementById('promptInput');
         const generateBtn = document.getElementById('generateBtn');
-        const imageStage = document.getElementById('imageStage');
         const resultImage = document.getElementById('resultImage');
         const loader = document.getElementById('loader');
+        const displayArea = document.getElementById('displayArea');
         const placeholder = document.getElementById('placeholder');
-        const imageOverlay = document.getElementById('imageOverlay');
-        const gallery = document.getElementById('gallery');
+        const imgControls = document.getElementById('imgControls');
+        const historyList = document.getElementById('historyList');
 
-        // Random Prompts for "Surprise Me"
-        const promptIdeas = [
-            "A cyberpunk street food vendor in Tokyo, raining neon lights, highly detailed, 8k",
-            "Portrait of a cat astronaut floating in a nebula, digital art, vibrant colors",
-            "An isometric 3D render of a cozy cottage in the woods, low poly style",
-            "A steampunk mechanical dragon, brass and copper gears, smoke, cinematic lighting",
-            "Minimalist landscape of sand dunes on Mars, sunset, synthwave color palette",
-            "A transparent glass apple with a galaxy inside, photorealistic, studio lighting"
-        ];
+        // Load History on Start
+        let searchHistory = JSON.parse(localStorage.getItem('aether_history')) || [];
+        renderHistory();
 
-        function randomPrompt() {
-            const randomIndex = Math.floor(Math.random() * promptIdeas.length);
-            promptInput.value = promptIdeas[randomIndex];
-            // Optional: Auto generate
-            // generateImage(); 
-        }
-
-        // Enter Key Listener
-        promptInput.addEventListener("keypress", (e) => {
-            if(e.key === "Enter") generateImage();
+        // Keyboard Shortcut (Ctrl+Enter)
+        promptInput.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                generateImage();
+            }
         });
 
+        // 1. Core Generation Logic
         async function generateImage() {
             const prompt = promptInput.value.trim();
-            if (!prompt) {
-                showToast("Please enter a prompt description.", "error");
-                return;
-            }
+            if (!prompt) return shakeInput();
 
-            // UI State: Loading
             setLoading(true);
+            addToHistory(prompt); // Save Prompt
 
             try {
                 const fullUrl = API_URL + encodeURIComponent(prompt);
-                
-                // Fetch
                 const response = await fetch(fullUrl);
-                if (!response.ok) throw new Error("API Limit or Server Error");
+                
+                if (!response.ok) throw new Error("API Error");
 
                 const contentType = response.headers.get("content-type");
                 let imgUrl = "";
 
-                // Handle Response Type
                 if (contentType && contentType.includes("application/json")) {
                     const data = await response.json();
                     imgUrl = data.image || data.url || data.link || data.data; 
@@ -462,103 +421,147 @@
                     imgUrl = URL.createObjectURL(blob);
                 }
 
-                if(!imgUrl) throw new Error("No image data received");
+                if (!imgUrl) throw new Error("No image found");
 
-                // Display Image
+                // Image Loaded
                 resultImage.onload = () => {
                     setLoading(false);
-                    showToast("Image generated successfully!", "success");
-                    addToGallery(imgUrl);
+                    displayArea.classList.add('loaded');
                 };
-                
                 resultImage.src = imgUrl;
 
             } catch (error) {
                 console.error(error);
                 setLoading(false);
-                showToast("Generation failed. Try a simpler prompt.", "error");
-                // Restore placeholder if failed
-                if(resultImage.style.display === 'none') {
-                    placeholder.style.display = 'block';
-                }
+                alert("Generation failed. The AI might be busy. Please try again.");
             }
         }
 
+        // 2. UI Helpers
         function setLoading(isLoading) {
             if (isLoading) {
                 generateBtn.disabled = true;
-                generateBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Generating...';
-                
-                placeholder.style.display = 'none';
+                generateBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
                 resultImage.style.display = 'none';
-                resultImage.style.opacity = '0';
-                imageOverlay.style.display = 'none';
-                
-                loader.style.display = 'flex';
-                imageStage.classList.remove('has-image');
+                placeholder.style.display = 'none';
+                loader.style.display = 'block';
+                imgControls.style.display = 'none';
+                displayArea.classList.remove('loaded');
             } else {
                 generateBtn.disabled = false;
-                generateBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Generate</span>';
-                
+                generateBtn.innerHTML = '<i class="fa-solid fa-bolt"></i>';
                 loader.style.display = 'none';
                 resultImage.style.display = 'block';
-                // Trigger reflow for fade animation
-                setTimeout(() => resultImage.style.opacity = '1', 50);
-                imageOverlay.style.display = 'flex';
-                imageStage.classList.add('has-image');
+                imgControls.style.display = 'flex';
             }
         }
 
-        function addToGallery(url) {
-            const div = document.createElement('div');
-            div.className = 'gallery-item';
-            div.innerHTML = `<img src="${url}" onclick="restoreFromGallery('${url}')" loading="lazy">`;
+        function shakeInput() {
+            const box = document.querySelector('.input-box');
+            box.style.transform = 'translateX(5px)';
+            setTimeout(() => box.style.transform = 'translateX(-5px)', 50);
+            setTimeout(() => box.style.transform = 'translateX(5px)', 100);
+            setTimeout(() => box.style.transform = 'translateX(0)', 150);
+        }
+
+        // 3. Style & Enhance Features
+        function applyStyle(element, styleName) {
+            // Visual toggle
+            const chips = document.querySelectorAll('.chip');
+            chips.forEach(c => c.classList.remove('active'));
+            if(!element.classList.contains('enhance-btn')) element.classList.add('active');
+
+            // Logic: Append style if not present
+            let currentText = promptInput.value;
+            const styleString = `, ${styleName} style, highly detailed`;
             
-            // Add to beginning
-            gallery.insertBefore(div, gallery.firstChild);
+            if(currentText.includes(styleName)) return; // Don't duplicate
+            
+            if(currentText === "") {
+                promptInput.value = styleName + " masterpiece";
+            } else {
+                promptInput.value = currentText + styleString;
+            }
         }
 
-        function restoreFromGallery(url) {
-            resultImage.src = url;
-            resultImage.style.display = 'block';
-            resultImage.style.opacity = '1';
-            imageStage.classList.add('has-image');
-            placeholder.style.display = 'none';
-            imageOverlay.style.display = 'flex';
+        function enhancePrompt() {
+            const current = promptInput.value;
+            if(!current) return;
+            
+            const enhancements = ", 8k resolution, cinematic lighting, photorealistic, trending on artstation, unreal engine 5 render, sharp focus";
+            
+            if(!current.includes("8k resolution")) {
+                promptInput.value = current + enhancements;
+                
+                // Visual feedback
+                const btn = document.querySelector('.enhance-btn');
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Enhanced!';
+                setTimeout(() => btn.innerHTML = originalHtml, 1500);
+            }
         }
 
+        // 4. History Management
+        function addToHistory(text) {
+            // Avoid duplicates at the top
+            if(searchHistory.length > 0 && searchHistory[0] === text) return;
+            
+            searchHistory.unshift(text);
+            if(searchHistory.length > 20) searchHistory.pop(); // Limit to 20
+            
+            localStorage.setItem('aether_history', JSON.stringify(searchHistory));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            historyList.innerHTML = "";
+            if(searchHistory.length === 0) {
+                historyList.innerHTML = '<div style="text-align: center; margin-top: 20px; color: #475569;">No history yet</div>';
+                return;
+            }
+
+            searchHistory.forEach(text => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerText = text.length > 60 ? text.substring(0, 60) + '...' : text;
+                div.onclick = () => {
+                    promptInput.value = text;
+                    toggleSidebar(); // Close on mobile selection
+                };
+                historyList.appendChild(div);
+            });
+        }
+
+        function clearHistory() {
+            searchHistory = [];
+            localStorage.removeItem('aether_history');
+            renderHistory();
+        }
+
+        // 5. Download & Lightbox
         function downloadImage() {
-            if(!resultImage.src) return;
-            const link = document.createElement('a');
-            link.href = resultImage.src;
-            link.download = `nexus-ai-${Date.now()}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            showToast("Download started", "success");
+            if (!resultImage.src) return;
+            const a = document.createElement('a');
+            a.href = resultImage.src;
+            a.download = `AETHER-${Date.now()}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
 
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            
-            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-            
-            toast.innerHTML = `
-                <i class="fa-solid ${icon}"></i>
-                <span>${message}</span>
-            `;
-            
-            container.appendChild(toast);
-            
-            // Animation timing
-            setTimeout(() => toast.classList.add('show'), 100);
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+        function openLightbox() {
+            if (!resultImage.src) return;
+            document.getElementById('lightboxImg').src = resultImage.src;
+            document.getElementById('lightbox').style.display = 'flex';
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').style.display = 'none';
+        }
+
+        // 6. Mobile Sidebar
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
         }
     </script>
 </body>
