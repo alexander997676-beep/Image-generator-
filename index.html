@@ -3,467 +3,401 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAZ AI | Infinity</title>
+    <title>FAZ AI | OMEGA Studio</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;500;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --accent: #8b5cf6; /* Violet */
-            --accent-glow: #a78bfa;
-            --bg: #020617;
-            --surface: rgba(255, 255, 255, 0.03);
+            --primary: #6366f1; /* Indigo */
+            --accent: #d946ef; /* Fuchsia */
+            --dark-bg: #030712;
+            --card-bg: #111827;
             --border: rgba(255, 255, 255, 0.08);
-            --text: #f8fafc;
+            --text-main: #f9fafb;
+            --text-sub: #9ca3af;
+            --gradient: linear-gradient(135deg, var(--primary), var(--accent));
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-main);
             height: 100vh;
             overflow: hidden;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        }
+
+        /* --- Background Grid --- */
+        .bg-grid {
+            position: absolute; width: 100%; height: 100%; z-index: -1;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(circle at center, black, transparent 80%);
+        }
+
+        /* --- Sidebar (History) --- */
+        .drawer {
+            width: 320px;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border);
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed; top: 0; bottom: 0; left: 0; z-index: 50;
+            display: flex; flex-direction: column;
+            padding: 20px;
+        }
+        .drawer.open { transform: translateX(0); }
+        .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .drawer-close { cursor: pointer; color: var(--text-sub); transition: 0.2s; }
+        .drawer-close:hover { color: white; }
+        
+        .history-list { overflow-y: auto; flex: 1; display: grid; gap: 15px; }
+        .history-card {
+            background: rgba(0,0,0,0.3); border-radius: 12px; overflow: hidden;
+            border: 1px solid var(--border); cursor: pointer; transition: 0.2s;
+        }
+        .history-card:hover { border-color: var(--primary); }
+        .history-card img { width: 100%; height: 150px; object-fit: cover; }
+        .history-meta { padding: 10px; font-size: 0.8rem; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* --- Main Content --- */
+        .main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            height: 100%;
             position: relative;
+            transition: margin-left 0.3s;
+        }
+        .drawer.open + .main { margin-left: 320px; } /* Push content on desktop */
+
+        /* Left Panel: Controls */
+        .controls-panel {
+            background: rgba(17, 24, 39, 0.8);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border);
+            padding: 30px;
+            display: flex; flex-direction: column; gap: 25px;
+            overflow-y: auto;
         }
 
-        /* --- Ambient Background --- */
-        .ambient-light {
-            position: absolute;
-            width: 100%; height: 100%;
-            overflow: hidden;
-            z-index: -1;
-            background: #020617;
-        }
-        .blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.6;
-            animation: float 20s infinite ease-in-out alternate;
-        }
-        .b1 { width: 50vw; height: 50vw; background: #4c1d95; top: -10%; left: -10%; }
-        .b2 { width: 40vw; height: 40vw; background: #0f766e; bottom: -10%; right: -10%; animation-delay: -5s; }
-        .b3 { width: 30vw; height: 30vw; background: #be185d; top: 40%; left: 40%; animation-duration: 30s; }
+        .logo { font-family: 'Exo 2', sans-serif; font-size: 2rem; font-weight: 800; letter-spacing: 2px; }
+        .logo span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        @keyframes float {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(30px, -50px) scale(1.1); }
+        .label { font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; font-weight: 600; letter-spacing: 1px; margin-bottom: 10px; display: block; }
+
+        textarea {
+            width: 100%; height: 100px;
+            background: #030712; border: 1px solid var(--border);
+            color: white; padding: 15px; border-radius: 12px;
+            resize: none; font-family: inherit; transition: 0.3s;
+        }
+        textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
+
+        /* Style Cards */
+        .style-scroller { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+        .style-card {
+            min-width: 100px; height: 120px;
+            background: #030712; border: 1px solid var(--border);
+            border-radius: 12px; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+            transition: 0.2s; position: relative; overflow: hidden;
+        }
+        .style-card.active { border-color: var(--accent); background: rgba(217, 70, 239, 0.1); }
+        .style-card i { font-size: 1.5rem; color: var(--text-sub); }
+        .style-card span { font-size: 0.8rem; font-weight: 600; }
+        
+        /* Modifiers */
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .chip {
+            padding: 6px 12px; background: rgba(255,255,255,0.05);
+            border-radius: 20px; font-size: 0.8rem; cursor: pointer; border: 1px solid transparent; transition: 0.2s;
+        }
+        .chip:hover { background: rgba(255,255,255,0.1); }
+        .chip.active { background: var(--primary); color: white; }
+
+        .generate-btn {
+            margin-top: auto;
+            background: var(--gradient);
+            color: white; border: none; padding: 16px;
+            border-radius: 12px; font-weight: 700; font-size: 1rem;
+            cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px;
+            transition: transform 0.2s;
+        }
+        .generate-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4); }
+        .generate-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        /* Right Panel: Preview */
+        .preview-panel {
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+            padding: 40px;
         }
 
-        /* --- Header --- */
-        .header {
-            position: absolute;
-            top: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 10;
-        }
-        .brand {
-            font-size: 3rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            background: linear-gradient(135deg, #fff, #94a3b8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 5px;
-        }
-        .brand span { color: var(--accent); -webkit-text-fill-color: var(--accent); }
-        .badge {
-            background: rgba(255,255,255,0.1);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            backdrop-filter: blur(10px);
+        .art-board {
+            max-width: 100%; max-height: 100%;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: none; object-fit: contain;
             border: 1px solid var(--border);
         }
 
-        /* --- Main Stage (Image) --- */
-        .stage {
-            width: 100%;
-            max-width: 1000px; /* Large cinematic view */
-            height: 60vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            perspective: 1000px;
-        }
+        .placeholder { text-align: center; color: var(--text-sub); animation: float 6s infinite ease-in-out; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-        .frame {
-            position: relative;
-            max-width: 90%;
-            max-height: 90%;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 20px 80px rgba(0,0,0,0.5);
-            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-            background: rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.05);
+        .top-nav {
+            position: absolute; top: 20px; left: 20px;
+            display: flex; gap: 15px;
         }
-        
-        .frame:hover { transform: scale(1.02); box-shadow: 0 30px 100px rgba(139, 92, 246, 0.15); }
-        
-        .frame img {
-            display: block;
-            max-width: 100%;
-            max-height: 60vh;
-            object-fit: contain;
-            opacity: 0;
-            transition: opacity 1s ease;
-        }
-        
-        .frame.active img { opacity: 1; }
-
-        /* Actions Overlay (Download/Expand) */
-        .actions {
-            position: absolute;
-            bottom: 20px; right: 20px;
-            display: flex; gap: 10px;
-            opacity: 0; transition: 0.3s;
-        }
-        .frame:hover .actions { opacity: 1; }
-        
-        .action-btn {
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
+        .nav-btn {
+            background: rgba(0,0,0,0.5); border: 1px solid var(--border);
+            color: white; width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
             transition: 0.2s;
         }
-        .action-btn:hover { background: white; color: black; transform: scale(1.1); }
+        .nav-btn:hover { background: white; color: black; }
 
-        /* --- Loading State --- */
-        .infinity-loader {
-            position: absolute;
-            width: 60px; height: 60px;
-            display: none;
+        .loader-bar {
+            position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            z-index: 10; display: none;
+            animation: loadProgress 2s infinite ease-in-out;
+            width: 0%;
         }
-        .infinity-loader svg { width: 100%; height: 100%; animation: rotate 2s linear infinite; }
-        .infinity-loader circle {
-            fill: none; stroke: var(--accent); stroke-width: 4; stroke-dasharray: 100; stroke-dashoffset: 100;
-            animation: dash 1.5s ease-in-out infinite;
+        @keyframes loadProgress { 0% { width: 0%; left: 0; } 50% { width: 70%; } 100% { width: 100%; left: 100%; } }
+
+        /* Mobile */
+        @media (max-width: 900px) {
+            .main { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+            .controls-panel { height: auto; max-height: 40vh; border-right: none; border-bottom: 1px solid var(--border); }
+            .preview-panel { height: 60vh; padding: 20px; }
+            .drawer.open + .main { margin-left: 0; transform: translateX(320px); }
         }
-        @keyframes rotate { 100% { transform: rotate(360deg); } }
-        @keyframes dash { 0% { stroke-dasharray: 1, 150; stroke-dashoffset: 0; } 50% { stroke-dasharray: 90, 150; stroke-dashoffset: -35; } 100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; } }
-
-        /* --- Dock (Controls) --- */
-        .dock-wrapper {
-            position: fixed;
-            bottom: 40px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            z-index: 20;
-            padding: 0 20px;
-        }
-
-        .dock {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 10px;
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-            max-width: 700px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            transition: transform 0.3s;
-        }
-
-        .dock:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3); }
-
-        .input-area {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 1rem;
-            padding: 12px 15px;
-            font-family: inherit;
-        }
-        .input-area::placeholder { color: rgba(255,255,255,0.4); }
-
-        .dock-btn {
-            width: 45px; height: 45px;
-            border-radius: 16px;
-            border: none;
-            cursor: pointer;
-            background: rgba(255,255,255,0.05);
-            color: rgba(255,255,255,0.7);
-            transition: all 0.2s;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem;
-            position: relative;
-        }
-
-        .dock-btn:hover { background: rgba(255,255,255,0.15); color: white; }
-        
-        .dock-btn.primary {
-            background: linear-gradient(135deg, var(--accent), #6366f1);
-            color: white;
-            width: auto;
-            padding: 0 25px;
-            font-weight: 700;
-        }
-        .dock-btn.primary:hover { filter: brightness(1.2); transform: translateY(-2px); }
-        .dock-btn.primary span { margin-left: 8px; }
-
-        .recording-pulse {
-            position: absolute; width: 100%; height: 100%;
-            border-radius: 16px; border: 2px solid #ef4444;
-            animation: pulse-red 1.5s infinite;
-            display: none;
-        }
-        .dock-btn.recording { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
-        .dock-btn.recording .recording-pulse { display: block; }
-
-        @keyframes pulse-red { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.4); opacity: 0; } }
-
-        /* History Ribbon */
-        .history-ribbon {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            display: flex;
-            justify-content: center;
-            z-index: 10;
-        }
-        .history-trigger {
-            background: rgba(255,255,255,0.1);
-            width: 100px; height: 4px; border-radius: 4px;
-            margin-bottom: 5px;
-            transition: 0.3s;
-        }
-
-        /* Toast */
-        .toast {
-            position: fixed; top: 30px; 
-            background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
-            padding: 10px 20px; border-radius: 30px;
-            border: 1px solid rgba(255,255,255,0.1);
-            font-size: 0.9rem; transform: translateY(-100px); transition: 0.5s;
-        }
-        .toast.show { transform: translateY(0); }
-
-        @media (max-width: 600px) {
-            .brand { font-size: 2rem; }
-            .dock-btn.primary span { display: none; }
-            .dock-btn.primary { padding: 0; width: 45px; }
-            .frame { max-width: 100%; }
-        }
-
     </style>
 </head>
 <body>
 
-    <!-- Ambient Background -->
-    <div class="ambient-light">
-        <div class="blob b1"></div>
-        <div class="blob b2"></div>
-        <div class="blob b3"></div>
+    <div class="bg-grid"></div>
+
+    <!-- History Drawer -->
+    <div class="drawer" id="drawer">
+        <div class="drawer-header">
+            <h3><i class="fa-solid fa-clock-rotate-left"></i> History</h3>
+            <div class="drawer-close" onclick="toggleDrawer()"><i class="fa-solid fa-xmark fa-lg"></i></div>
+        </div>
+        <div class="history-list" id="historyList">
+            <!-- JS items -->
+        </div>
     </div>
 
-    <!-- Header -->
-    <div class="header">
-        <div class="brand">FAZ <span>AI</span></div>
-        <div class="badge">Infinity Edition</div>
-        <div class="toast" id="toast">Copied to clipboard</div>
-    </div>
-
-    <!-- Stage -->
-    <div class="stage">
+    <div class="main">
         
-        <div class="infinity-loader" id="loader">
-            <svg viewBox="25 25 50 50"><circle cx="50" cy="50" r="20"></circle></svg>
-        </div>
-
-        <div class="frame" id="frame">
-            <img id="resultImage" alt="">
-            <div class="actions">
-                <button class="action-btn" onclick="downloadImage()" title="Download"><i class="fa-solid fa-download"></i></button>
-                <button class="action-btn" onclick="openFull()" title="Fullscreen"><i class="fa-solid fa-expand"></i></button>
+        <!-- Controls -->
+        <div class="controls-panel">
+            <div class="logo">FAZ <span>OMEGA</span></div>
+            
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <span class="label">Prompt</span>
+                    <span style="font-size: 0.7rem; color: var(--accent); cursor: pointer;" onclick="magicEnhance()"><i class="fa-solid fa-wand-magic-sparkles"></i> Enhance</span>
+                </div>
+                <textarea id="promptInput" placeholder="A futuristic city in the clouds..." spellcheck="false"></textarea>
             </div>
+
+            <div>
+                <span class="label">Visual Style</span>
+                <div class="style-scroller">
+                    <div class="style-card" onclick="selectStyle(this, 'Cyberpunk, neon lights')">
+                        <i class="fa-solid fa-city"></i><span>Cyberpunk</span>
+                    </div>
+                    <div class="style-card" onclick="selectStyle(this, 'Hyper-realistic, 8k, Unreal Engine 5')">
+                        <i class="fa-solid fa-camera"></i><span>Realism</span>
+                    </div>
+                    <div class="style-card" onclick="selectStyle(this, 'Studio Ghibli, Anime style')">
+                        <i class="fa-solid fa-paintbrush"></i><span>Anime</span>
+                    </div>
+                    <div class="style-card" onclick="selectStyle(this, 'Low poly, 3D render, blender')">
+                        <i class="fa-solid fa-cube"></i><span>3D</span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <span class="label">Lighting & Comp</span>
+                <div class="chips">
+                    <div class="chip" onclick="toggleChip(this, 'Cinematic Lighting')">Cinematic</div>
+                    <div class="chip" onclick="toggleChip(this, 'Volumetric Fog')">Foggy</div>
+                    <div class="chip" onclick="toggleChip(this, 'Golden Hour')">Golden Hour</div>
+                    <div class="chip" onclick="toggleChip(this, 'Wide Angle')">Wide Angle</div>
+                    <div class="chip" onclick="toggleChip(this, 'Macro Lens')">Macro</div>
+                </div>
+            </div>
+
+            <button class="generate-btn" id="genBtn" onclick="generate()">
+                <span>GENERATE ART</span> <i class="fa-solid fa-arrow-right-long"></i>
+            </button>
         </div>
 
-        <!-- Empty State Hint -->
-        <div id="hint" style="position:absolute; color:rgba(255,255,255,0.3); text-align:center;">
-            <i class="fa-solid fa-wand-magic-sparkles fa-3x" style="margin-bottom:15px"></i>
-            <p>Dream it. Speak it. See it.</p>
+        <!-- Preview -->
+        <div class="preview-panel">
+            <div class="loader-bar" id="loader"></div>
+            
+            <div class="top-nav">
+                <div class="nav-btn" onclick="toggleDrawer()" title="History"><i class="fa-solid fa-bars"></i></div>
+                <div class="nav-btn" onclick="downloadImage()" title="Download"><i class="fa-solid fa-download"></i></div>
+            </div>
+
+            <div class="placeholder" id="placeholder">
+                <i class="fa-brands fa-space-awesome fa-4x" style="margin-bottom: 20px; opacity: 0.5;"></i>
+                <h2>OMEGA ENGINE READY</h2>
+                <p>Configure parameters and initiate generation.</p>
+            </div>
+
+            <img id="resultImage" class="art-board" alt="Generated Art">
         </div>
-    </div>
 
-    <!-- Floating Dock -->
-    <div class="dock-wrapper">
-        <div class="dock">
-            <!-- Voice Input -->
-            <button class="dock-btn" id="micBtn" onclick="toggleVoice()" title="Voice Input">
-                <div class="recording-pulse"></div>
-                <i class="fa-solid fa-microphone"></i>
-            </button>
-
-            <!-- Magic Expand -->
-            <button class="dock-btn" onclick="magicExpand()" title="Magic Expand Prompt">
-                <i class="fa-solid fa-hat-wizard"></i>
-            </button>
-
-            <!-- Input -->
-            <input type="text" class="input-area" id="prompt" placeholder="Describe your imagination..." autocomplete="off">
-
-            <!-- Generate -->
-            <button class="dock-btn primary" id="genBtn" onclick="generate()">
-                <i class="fa-solid fa-bolt"></i> <span>Create</span>
-            </button>
-        </div>
     </div>
 
     <script>
         const API_URL = "https://api.xyro.site/ai/magic-studio?prompt=";
-        const promptInput = document.getElementById('prompt');
-        const frame = document.getElementById('frame');
-        const img = document.getElementById('resultImage');
+        const promptInput = document.getElementById('promptInput');
+        const resultImage = document.getElementById('resultImage');
+        const placeholder = document.getElementById('placeholder');
         const loader = document.getElementById('loader');
-        const hint = document.getElementById('hint');
         const genBtn = document.getElementById('genBtn');
-        const micBtn = document.getElementById('micBtn');
+        const historyList = document.getElementById('historyList');
+        const drawer = document.getElementById('drawer');
 
-        // --- 1. Voice Recognition (Web Speech API) ---
-        let recognition;
-        let isRecording = false;
+        let selectedStyle = "";
+        let activeChips = [];
 
-        if ('webkitSpeechRecognition' in window) {
-            recognition = new webkitSpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'en-US';
-
-            recognition.onstart = function() {
-                isRecording = true;
-                micBtn.classList.add('recording');
-                promptInput.placeholder = "Listening...";
-            };
-
-            recognition.onend = function() {
-                isRecording = false;
-                micBtn.classList.remove('recording');
-                promptInput.placeholder = "Describe your imagination...";
-            };
-
-            recognition.onresult = function(event) {
-                const transcript = event.results[0][0].transcript;
-                promptInput.value = transcript;
-                // Optional: Auto-generate after speaking
-                // generate(); 
-            };
-        } else {
-            micBtn.style.display = 'none'; // Hide if not supported
+        // --- 1. UI Logic ---
+        function toggleDrawer() {
+            drawer.classList.toggle('open');
         }
 
-        function toggleVoice() {
-            if (!recognition) return alert("Voice not supported in this browser.");
-            if (isRecording) recognition.stop();
-            else recognition.start();
+        function selectStyle(el, styleText) {
+            document.querySelectorAll('.style-card').forEach(c => c.classList.remove('active'));
+            if (selectedStyle === styleText) {
+                selectedStyle = ""; // toggle off
+            } else {
+                el.classList.add('active');
+                selectedStyle = styleText;
+            }
         }
 
-        // --- 2. Magic Expand (Prompt Engineering) ---
-        const styles = ["Cinematic Lighting", "Cyberpunk", "Studio Ghibli", "Oil Painting", "Hyperrealistic 8k", "Unreal Engine 5", "Vaporwave"];
-        const adjectives = ["intricate", "detailed", "glowing", "mystical", "vibrant", "moody", "majestic"];
-
-        function magicExpand() {
-            let text = promptInput.value.trim();
-            if(!text) return showToast("Type a basic word first (e.g., 'Cat')");
-
-            const randomStyle = styles[Math.floor(Math.random() * styles.length)];
-            const randomAdj = adjectives[Math.floor(Math.random() * adjectives.length)];
-            
-            // Rewrite logic
-            promptInput.value = `${text}, ${randomAdj}, ${randomStyle}, sharp focus, masterpiece`;
-            
-            // Visual feedback
-            const btn = document.querySelector('.fa-hat-wizard');
-            btn.classList.add('fa-spin');
-            setTimeout(() => btn.classList.remove('fa-spin'), 1000);
+        function toggleChip(el, text) {
+            el.classList.toggle('active');
+            if (activeChips.includes(text)) {
+                activeChips = activeChips.filter(t => t !== text);
+            } else {
+                activeChips.push(text);
+            }
         }
 
-        // --- 3. Generation Logic ---
+        function magicEnhance() {
+            const current = promptInput.value.trim();
+            if(!current) return;
+            const enhancements = "highly detailed, 8k resolution, masterpiece, sharp focus, trending on artstation";
+            if(!current.includes("masterpiece")) {
+                promptInput.value = `${current}, ${enhancements}`;
+            }
+        }
+
+        // --- 2. Generation Logic ---
         async function generate() {
-            const prompt = promptInput.value.trim();
-            if (!prompt) return showToast("Please enter a prompt");
+            const basePrompt = promptInput.value.trim();
+            if (!basePrompt) return alert("Please enter a prompt.");
 
-            // UI State: Loading
-            hint.style.display = 'none';
-            frame.classList.remove('active'); // Hide old image
+            // Build full prompt
+            let finalPrompt = basePrompt;
+            if (selectedStyle) finalPrompt += `, ${selectedStyle}`;
+            if (activeChips.length > 0) finalPrompt += `, ${activeChips.join(", ")}`;
+
+            // UI State
+            placeholder.style.display = 'none';
+            resultImage.style.display = 'none';
             loader.style.display = 'block';
+            loader.style.width = '100%'; // Trigger animation css
             genBtn.disabled = true;
-            genBtn.style.opacity = '0.7';
+            genBtn.innerHTML = "RENDERING...";
 
             try {
-                const response = await fetch(API_URL + encodeURIComponent(prompt));
-                if (!response.ok) throw new Error("API Limit/Error");
+                const response = await fetch(API_URL + encodeURIComponent(finalPrompt));
+                
+                if (!response.ok) throw new Error("Server Error");
 
-                // Blob handling ensures image works
-                const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
+                const contentType = response.headers.get("content-type");
+                let imgUrl = "";
 
-                img.onload = () => {
+                if (contentType && contentType.includes("application/json")) {
+                    const data = await response.json();
+                    imgUrl = data.image || data.url; 
+                } else {
+                    const blob = await response.blob();
+                    imgUrl = URL.createObjectURL(blob);
+                }
+
+                // Success
+                resultImage.onload = () => {
                     loader.style.display = 'none';
-                    frame.classList.add('active'); // Fade in
+                    resultImage.style.display = 'block';
                     genBtn.disabled = false;
-                    genBtn.style.opacity = '1';
+                    genBtn.innerHTML = `<span>GENERATE ART</span> <i class="fa-solid fa-arrow-right-long"></i>`;
+                    saveToHistory(imgUrl, basePrompt);
                 };
-                img.src = url;
+                resultImage.src = imgUrl;
 
             } catch (err) {
                 console.error(err);
                 loader.style.display = 'none';
+                placeholder.style.display = 'block';
+                placeholder.innerHTML = `<h3 style="color:var(--accent)">Generation Failed</h3><p>Try again later.</p>`;
                 genBtn.disabled = false;
-                genBtn.style.opacity = '1';
-                showToast("Generation failed. Try again.");
-                hint.style.display = 'block';
+                genBtn.innerHTML = "RETRY";
             }
         }
 
-        // --- 4. Utilities ---
+        // --- 3. History & Utils ---
+        function saveToHistory(url, prompt) {
+            // Create History Card UI
+            const div = document.createElement('div');
+            div.className = 'history-card';
+            div.innerHTML = `
+                <img src="${url}" loading="lazy">
+                <div class="history-meta">${prompt}</div>
+            `;
+            div.onclick = () => {
+                resultImage.src = url;
+                resultImage.style.display = 'block';
+                placeholder.style.display = 'none';
+                promptInput.value = prompt;
+                if(window.innerWidth < 900) toggleDrawer();
+            };
+            
+            historyList.prepend(div);
+            
+            // Note: For true persistence across refresh, we'd need to convert blobs to Base64 
+            // and save to localStorage, but for this session, this works perfectly.
+        }
+
         function downloadImage() {
-            if (!img.src) return;
+            if (!resultImage.src) return;
             const a = document.createElement('a');
-            a.href = img.src;
-            a.download = `FAZ-Infinity-${Date.now()}.png`;
+            a.href = resultImage.src;
+            a.download = `FAZ-OMEGA-${Date.now()}.png`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            showToast("Downloading...");
         }
 
-        function openFull() {
-            if (img.src) window.open(img.src, '_blank');
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-
-        // Enter key support
-        promptInput.addEventListener("keypress", (e) => {
-            if(e.key === "Enter") generate();
+        // Shortcut
+        promptInput.addEventListener('keydown', (e) => {
+            if(e.ctrlKey && e.key === 'Enter') generate();
         });
 
     </script>
