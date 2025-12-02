@@ -3,430 +3,563 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mob i - Latest & Search</title>
+    <title>NexusAI | Magic Studio</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* --- CSS STYLES --- */
         :root {
-            --primary: #00e5ff; /* Cyan Blue */
-            --bg: #121212;
-            --card-bg: #1e1e1e;
-            --text-main: #ffffff;
-            --text-sec: #b3b3b3;
+            --primary: #8b5cf6;
+            --secondary: #06b6d4;
+            --bg-dark: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
 
         body {
-            background-color: var(--bg);
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.15) 0%, transparent 20%);
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            overflow-x: hidden;
         }
 
-        /* Navbar */
-        nav {
-            background: rgba(30, 30, 30, 0.95);
-            padding: 15px 5%;
+        /* --- UI Layout --- */
+        .app-wrapper {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- Header --- */
+        header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-left: 10px;
+            vertical-align: middle;
+            color: white;
+            -webkit-text-fill-color: white;
+        }
+
+        /* --- Main Card --- */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- Controls --- */
+        .input-area {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 8px;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            transition: border-color 0.3s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+        }
+
+        input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            padding: 12px 16px;
+            outline: none;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .prompt-tools {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+
+        /* --- Image Display --- */
+        .image-stage {
+            width: 100%;
+            aspect-ratio: 16/9; /* Default aspect, adjusts to image */
+            min-height: 400px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+
+        .image-stage.has-image {
+            border: none;
+            background: transparent;
+            aspect-ratio: auto;
+        }
+
+        .generated-img {
+            max-width: 100%;
+            max-height: 600px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
             display: flex;
             justify-content: space-between;
+            align-items: flex-end;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+        }
+
+        .image-stage:hover .image-overlay {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- Loading Animation --- */
+        .loader {
+            display: none;
+            flex-direction: column;
             align-items: center;
-            border-bottom: 1px solid #333;
-            position: sticky;
+            gap: 15px;
+        }
+
+        .scan-line {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), var(--secondary), transparent);
+            position: absolute;
             top: 0;
+            animation: scan 2s linear infinite;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        @keyframes scan {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        .loader-text {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        /* --- Gallery --- */
+        .gallery-section {
+            margin-top: 1rem;
+        }
+        
+        .gallery-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .gallery-scroll {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--glass-border) transparent;
+        }
+
+        .gallery-item {
+            flex: 0 0 100px;
+            height: 100px;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-item:hover {
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        /* --- Toast Notification --- */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
             z-index: 100;
         }
 
-        .logo { font-size: 1.8rem; font-weight: 800; }
-        .logo span { color: var(--primary); }
-
-        .nav-links button {
-            background: none;
-            border: none;
-            color: var(--text-main);
-            font-size: 1rem;
-            margin-left: 20px;
-            cursor: pointer;
-            padding: 5px 10px;
-            font-weight: 500;
-            transition: 0.3s;
-        }
-
-        .nav-links button.active, .nav-links button:hover {
-            color: var(--primary);
-        }
-
-        /* Sections */
-        .section {
-            display: none; /* Hidden by default */
-            padding: 20px 5%;
-            width: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
-            animation: fadeIn 0.5s ease;
-        }
-        .section.active { display: block; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Titles */
-        .section-title {
-            font-size: 1.5rem;
-            margin: 20px 0;
+        .toast {
+            background: rgba(15, 23, 42, 0.95);
             border-left: 4px solid var(--primary);
-            padding-left: 15px;
-        }
-
-        /* Search Box Design */
-        .search-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 30px;
-            margin-top: 20px;
-        }
-
-        .input-group {
-            display: flex;
-            width: 100%;
-            max-width: 600px;
-            position: relative;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 15px 20px;
-            border-radius: 50px;
-            border: 2px solid #333;
-            background: var(--card-bg);
             color: white;
-            font-size: 1rem;
-            outline: none;
-            padding-right: 100px; /* Space for button */
-        }
-
-        input[type="text"]:focus { border-color: var(--primary); }
-
-        button#search-btn {
-            position: absolute;
-            right: 5px;
-            top: 5px;
-            bottom: 5px;
-            padding: 0 25px;
-            border-radius: 40px;
-            border: none;
-            background: var(--primary);
-            color: #000;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        button#search-btn:active { transform: scale(0.95); }
-
-        /* Grid System */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        /* Card Design */
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid #333;
-            cursor: pointer;
-            transition: transform 0.3s;
+            padding: 16px 24px;
+            border-radius: 8px;
+            margin-top: 10px;
             display: flex;
-            flex-direction: column;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: 0 5px 15px rgba(0, 229, 255, 0.1);
-        }
-
-        .card img {
-            width: 100%;
-            height: 220px;
-            object-fit: contain;
-            background: #fff;
-            padding: 15px;
-        }
-
-        .card-body { padding: 15px; text-align: center; }
-        .card-title { font-weight: bold; font-size: 1rem; margin-bottom: 5px; }
-        .card-desc { font-size: 0.8rem; color: var(--text-sec); display: none; } /* Hidden in grid, shown in popup */
-
-        /* Loader */
-        .loader {
-            display: none;
-            border: 4px solid #333;
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 30px auto;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        /* Modal (Popup) */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 1000;
-            justify-content: center;
             align-items: center;
-            padding: 20px;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transform: translateX(120%);
+            transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
         }
 
-        .modal-content {
-            background: var(--card-bg);
-            width: 100%;
-            max-width: 500px;
-            border-radius: 15px;
-            padding: 20px;
-            border: 1px solid var(--primary);
-            position: relative;
-            max-height: 90vh;
-            overflow-y: auto;
+        .toast.show {
+            transform: translateX(0);
         }
+        
+        .toast.error { border-left-color: #ef4444; }
+        .toast.success { border-left-color: #22c55e; }
 
-        .close-btn {
-            position: absolute;
-            top: 15px; right: 20px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #fff;
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .btn span { display: none; }
+            .btn { padding: 12px; }
+            .input-wrapper { flex-direction: column; gap: 5px; }
+            .btn-primary { width: 100%; justify-content: center; }
+            .gallery-item { flex: 0 0 80px; height: 80px; }
         }
-
-        .modal-specs ul { margin-top: 15px; list-style: none; }
-        .modal-specs li {
-            padding: 8px 0;
-            border-bottom: 1px solid #333;
-            color: var(--text-sec);
-            font-size: 0.9rem;
-        }
-        .modal-specs strong { color: var(--primary); display: block; }
-
     </style>
 </head>
 <body>
 
-    <!-- Navigation -->
-    <nav>
-        <div class="logo">mob <span>i</span></div>
-        <div class="nav-links">
-            <button id="btn-home" onclick="showPage('home')" class="active">Home</button>
-            <button id="btn-search" onclick="showPage('search')">Search</button>
-        </div>
-    </nav>
+    <div class="app-wrapper">
+        <header>
+            <h1>NexusAI <span class="badge">Pro</span></h1>
+            <p style="color: var(--text-muted)">Generate hyper-realistic images powered by Magic Studio</p>
+        </header>
 
-    <!-- 1. HOME SECTION (Trending/Latest) -->
-    <section id="home-section" class="section active">
-        <h2 class="section-title">🔥 Trending Now</h2>
-        <p style="color: gray; margin-bottom: 20px;">Top latest mobile phones</p>
-        
-        <!-- Loader for Home -->
-        <div id="home-loader" class="loader"></div>
-        
-        <div class="grid" id="home-grid">
-            <!-- Trending mobiles will load here automatically -->
-        </div>
-    </section>
-
-    <!-- 2. SEARCH SECTION -->
-    <section id="search-section" class="section">
-        <div class="search-container">
-            <div class="input-group">
-                <input type="text" id="search-input" placeholder="Search mobile (e.g. Pixel 8, iPhone 15)...">
-                <button id="search-btn" onclick="performSearch()">Search</button>
+        <div class="glass-panel">
+            <!-- Input Section -->
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <input type="text" id="promptInput" placeholder="A futuristic city with neon lights, cyberpunk style, 8k..." autocomplete="off">
+                    <button class="btn btn-primary" id="generateBtn" onclick="generateImage()">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Generate</span>
+                    </button>
+                </div>
+                <div class="prompt-tools">
+                    <button class="btn btn-secondary" onclick="randomPrompt()">
+                        <i class="fa-solid fa-dice"></i> Surprise Me
+                    </button>
+                </div>
             </div>
-        </div>
 
-        <!-- Loader for Search -->
-        <div id="search-loader" class="loader"></div>
+            <!-- Image Display -->
+            <div class="image-stage" id="imageStage">
+                
+                <!-- Loading Animation -->
+                <div class="loader" id="loader">
+                    <div class="scan-line"></div>
+                    <i class="fa-solid fa-circle-notch fa-spin fa-2x" style="color: var(--primary)"></i>
+                    <span class="loader-text">Constructing Reality...</span>
+                </div>
 
-        <div class="grid" id="search-grid">
-            <!-- Search results will appear here -->
-        </div>
-    </section>
+                <!-- Placeholder -->
+                <div id="placeholder" style="text-align: center; color: var(--text-muted);">
+                    <i class="fa-regular fa-image fa-3x" style="margin-bottom: 1rem; opacity: 0.5;"></i>
+                    <p>Your imagination awaits</p>
+                </div>
 
-    <!-- 3. DETAILS MODAL -->
-    <div class="modal" id="details-modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            <div style="text-align: center;">
-                <img id="modal-img" src="" style="height: 180px; margin-bottom: 10px;">
-                <h2 id="modal-title"></h2>
+                <!-- Result Image -->
+                <img id="resultImage" class="generated-img" alt="Generated Art">
+
+                <!-- Hover Overlay -->
+                <div class="image-overlay" id="imageOverlay" style="display: none;">
+                    <div style="background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 6px; font-size: 0.8rem;">
+                        <i class="fa-solid fa-check-circle" style="color: #4ade80"></i> Completed
+                    </div>
+                    <button class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;" onclick="downloadImage()">
+                        <i class="fa-solid fa-download"></i> Download
+                    </button>
+                </div>
             </div>
-            <div class="modal-specs" id="modal-specs"></div>
+
+            <!-- Session Gallery -->
+            <div class="gallery-section">
+                <div class="gallery-title">Session History</div>
+                <div class="gallery-scroll" id="gallery">
+                    <!-- Thumbnails appended here -->
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <script>
-        // API Base URL
-        const API_URL = "https://api.xyro.site/search/gsmarena";
+        // Configuration
+        const API_URL = "https://api.xyro.site/ai/magic-studio?prompt=";
+        
+        // Elements
+        const promptInput = document.getElementById('promptInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const imageStage = document.getElementById('imageStage');
+        const resultImage = document.getElementById('resultImage');
+        const loader = document.getElementById('loader');
+        const placeholder = document.getElementById('placeholder');
+        const imageOverlay = document.getElementById('imageOverlay');
+        const gallery = document.getElementById('gallery');
 
-        // ---- PAGE NAVIGATION LOGIC ----
-        function showPage(pageId) {
-            // Hide all sections
-            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-            document.querySelectorAll('.nav-links button').forEach(btn => btn.classList.remove('active'));
+        // Random Prompts for "Surprise Me"
+        const promptIdeas = [
+            "A cyberpunk street food vendor in Tokyo, raining neon lights, highly detailed, 8k",
+            "Portrait of a cat astronaut floating in a nebula, digital art, vibrant colors",
+            "An isometric 3D render of a cozy cottage in the woods, low poly style",
+            "A steampunk mechanical dragon, brass and copper gears, smoke, cinematic lighting",
+            "Minimalist landscape of sand dunes on Mars, sunset, synthwave color palette",
+            "A transparent glass apple with a galaxy inside, photorealistic, studio lighting"
+        ];
 
-            // Show selected section
-            if (pageId === 'home') {
-                document.getElementById('home-section').classList.add('active');
-                document.getElementById('btn-home').classList.add('active');
+        function randomPrompt() {
+            const randomIndex = Math.floor(Math.random() * promptIdeas.length);
+            promptInput.value = promptIdeas[randomIndex];
+            // Optional: Auto generate
+            // generateImage(); 
+        }
+
+        // Enter Key Listener
+        promptInput.addEventListener("keypress", (e) => {
+            if(e.key === "Enter") generateImage();
+        });
+
+        async function generateImage() {
+            const prompt = promptInput.value.trim();
+            if (!prompt) {
+                showToast("Please enter a prompt description.", "error");
+                return;
+            }
+
+            // UI State: Loading
+            setLoading(true);
+
+            try {
+                const fullUrl = API_URL + encodeURIComponent(prompt);
+                
+                // Fetch
+                const response = await fetch(fullUrl);
+                if (!response.ok) throw new Error("API Limit or Server Error");
+
+                const contentType = response.headers.get("content-type");
+                let imgUrl = "";
+
+                // Handle Response Type
+                if (contentType && contentType.includes("application/json")) {
+                    const data = await response.json();
+                    imgUrl = data.image || data.url || data.link || data.data; 
+                } else {
+                    const blob = await response.blob();
+                    imgUrl = URL.createObjectURL(blob);
+                }
+
+                if(!imgUrl) throw new Error("No image data received");
+
+                // Display Image
+                resultImage.onload = () => {
+                    setLoading(false);
+                    showToast("Image generated successfully!", "success");
+                    addToGallery(imgUrl);
+                };
+                
+                resultImage.src = imgUrl;
+
+            } catch (error) {
+                console.error(error);
+                setLoading(false);
+                showToast("Generation failed. Try a simpler prompt.", "error");
+                // Restore placeholder if failed
+                if(resultImage.style.display === 'none') {
+                    placeholder.style.display = 'block';
+                }
+            }
+        }
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                generateBtn.disabled = true;
+                generateBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Generating...';
+                
+                placeholder.style.display = 'none';
+                resultImage.style.display = 'none';
+                resultImage.style.opacity = '0';
+                imageOverlay.style.display = 'none';
+                
+                loader.style.display = 'flex';
+                imageStage.classList.remove('has-image');
             } else {
-                document.getElementById('search-section').classList.add('active');
-                document.getElementById('btn-search').classList.add('active');
-                // Focus on input automatically
-                setTimeout(() => document.getElementById('search-input').focus(), 100);
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Generate</span>';
+                
+                loader.style.display = 'none';
+                resultImage.style.display = 'block';
+                // Trigger reflow for fade animation
+                setTimeout(() => resultImage.style.opacity = '1', 50);
+                imageOverlay.style.display = 'flex';
+                imageStage.classList.add('has-image');
             }
         }
 
-        // ---- HOME PAGE LOGIC (AUTO LOAD) ----
-        // Jaise hi page load hoga, ye chalega
-        window.addEventListener('DOMContentLoaded', () => {
-            loadHomeData();
-        });
-
-        async function loadHomeData() {
-            const grid = document.getElementById('home-grid');
-            const loader = document.getElementById('home-loader');
-
-            loader.style.display = 'block';
-
-            // Kyunki ye API "Latest" ka direct option nahi deti,
-            // Hum "Samsung" ya "iPhone" search karke trending phones dikhayenge
-            // Taaki Home page khali na rahe.
-            try {
-                // Default search for Home Page (You can change "Samsung" to "2024" or "Apple")
-                const response = await fetch(`${API_URL}?q=Samsung`);
-                const json = await response.json();
-
-                loader.style.display = 'none';
-
-                if (json.status && json.data) {
-                    // Sirf pehle 8 phones dikhayenge home page par
-                    const topPhones = json.data.slice(0, 10);
-                    renderGrid(topPhones, grid);
-                } else {
-                    grid.innerHTML = "<p>Could not load trending phones.</p>";
-                }
-            } catch (error) {
-                console.error("Home Load Error:", error);
-                loader.style.display = 'none';
-                grid.innerHTML = "<p>Check internet connection.</p>";
-            }
-        }
-
-        // ---- SEARCH LOGIC (FIXED) ----
-        async function performSearch() {
-            const query = document.getElementById('search-input').value.trim();
-            const grid = document.getElementById('search-grid');
-            const loader = document.getElementById('search-loader');
-
-            if (!query) return; // Empty search ko roko
-
-            // UI Reset
-            grid.innerHTML = "";
-            loader.style.display = 'block';
-
-            try {
-                // API Call
-                const response = await fetch(`${API_URL}?q=${encodeURIComponent(query)}`);
-                const json = await response.json();
-
-                loader.style.display = 'none';
-
-                if (json.status && json.data && json.data.length > 0) {
-                    renderGrid(json.data, grid);
-                } else {
-                    grid.innerHTML = `<p style="text-align:center; width:100%; margin-top:20px;">No results found for "${query}"</p>`;
-                }
-
-            } catch (error) {
-                console.error("Search Error:", error);
-                loader.style.display = 'none';
-                grid.innerHTML = `<p style="text-align:center; color:red; width:100%;">API Error. Please try again.</p>`;
-            }
-        }
-
-        // ---- COMMON RENDER FUNCTION ----
-        function renderGrid(data, container) {
-            container.innerHTML = ""; // Clear old data
-            data.forEach(phone => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.onclick = () => openModal(phone); // Click to open details
-
-                card.innerHTML = `
-                    <img src="${phone.thumbnail}" alt="${phone.name}" onerror="this.src='https://via.placeholder.com/150?text=No+Img'">
-                    <div class="card-body">
-                        <div class="card-title">${phone.name}</div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        // ---- POPUP / MODAL LOGIC ----
-        function openModal(phone) {
-            const modal = document.getElementById('details-modal');
-            const specsContainer = document.getElementById('modal-specs');
-
-            document.getElementById('modal-title').innerText = phone.name;
-            document.getElementById('modal-img').src = phone.thumbnail;
-
-            // Description Parsing (Sahi format mein)
-            specsContainer.innerHTML = "";
-            const ul = document.createElement('ul');
-
-            let desc = phone.description || "Details not available";
-            // Cleaning text
-            desc = desc.replace("Android smartphone.", "").replace("Features", "");
+        function addToGallery(url) {
+            const div = document.createElement('div');
+            div.className = 'gallery-item';
+            div.innerHTML = `<img src="${url}" onclick="restoreFromGallery('${url}')" loading="lazy">`;
             
-            // Splitting logic
-            let items = desc.split(/,|\./); // Comma ya full stop se split karega
-
-            items.forEach(item => {
-                let text = item.trim();
-                if (text.length > 2) {
-                    let li = document.createElement('li');
-                    // Highlight specs like GB, mAh, inches
-                    if (text.match(/\d/)) {
-                        li.innerHTML = `<strong>•</strong> ${text}`;
-                        li.style.color = "#fff"; // Brighten text with numbers
-                    } else {
-                        li.innerText = text;
-                    }
-                    ul.appendChild(li);
-                }
-            });
-
-            specsContainer.appendChild(ul);
-            modal.style.display = "flex";
+            // Add to beginning
+            gallery.insertBefore(div, gallery.firstChild);
         }
 
-        function closeModal() {
-            document.getElementById('details-modal').style.display = "none";
+        function restoreFromGallery(url) {
+            resultImage.src = url;
+            resultImage.style.display = 'block';
+            resultImage.style.opacity = '1';
+            imageStage.classList.add('has-image');
+            placeholder.style.display = 'none';
+            imageOverlay.style.display = 'flex';
         }
 
-        // ---- ENTER KEY EVENT LISTENER ----
-        // Ye code ensure karega ki Enter dabane par search ho
-        document.getElementById('search-input').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                performSearch();
-            }
-        });
+        function downloadImage() {
+            if(!resultImage.src) return;
+            const link = document.createElement('a');
+            link.href = resultImage.src;
+            link.download = `nexus-ai-${Date.now()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("Download started", "success");
+        }
 
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            
+            toast.innerHTML = `
+                <i class="fa-solid ${icon}"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Animation timing
+            setTimeout(() => toast.classList.add('show'), 100);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
     </script>
 </body>
 </html>
